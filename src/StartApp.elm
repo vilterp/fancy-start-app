@@ -1,4 +1,4 @@
-module StartApp where
+module StartApp (App, LoopbackFun, start) where
 {-| This module makes it super simple to get started making a typical web-app.
 It is designed to work perfectly with [the Elm Architecture][arch] which
 describes a simple architecture pattern that makes testing and refactoring
@@ -18,7 +18,6 @@ import Html exposing (..)
 import Signal exposing (Address)
 import Task as T
 import Time
-
 
 {-| An app has three key components:
 
@@ -50,7 +49,7 @@ type alias App model error action =
             -> Time.Time
             -> action
             -> model
-            -> (model, Maybe (T.Task error ()))
+            -> (model, List (T.Task error ()))
     }
 
 {-| Use this in your update function to push the result of a task
@@ -139,7 +138,7 @@ start app externalActions =
     stateAndTask =
       Signal.foldp
         (\(now, Just action) (state, _) -> app.update loopbackFun now action state)
-        (app.initialState, Nothing)
+        (app.initialState, [])
         allActions
 
     html : Signal Html
@@ -151,6 +150,23 @@ start app externalActions =
     --tasks : Signal (T.Task error ())
     tasks =
       stateAndTask
-        |> Signal.filterMap snd (T.succeed ())
+        |> Signal.filterMap (snd >> toMaybe) []
+        |> Signal.map (sequence_ ())
   in
     (html, tasks)
+
+-- Util
+
+sequence_ : b -> List (T.Task x a) -> T.Task x b
+sequence_ result tasks =
+  T.sequence tasks `T.andThen`
+    (always <| T.succeed result)
+
+toMaybe : List a -> Maybe (List a)
+toMaybe list =
+  case list of
+    [] ->
+      Nothing
+
+    items ->
+      Just items
