@@ -44,6 +44,8 @@ hard in other languages.
 -}
 type alias App model error action =
     { initialState : model
+    , initialTasks : LoopbackFun error action -> List (T.Task error ())
+    , externalActions : Signal action
     , view : Address action -> model -> Html
     , update : LoopbackFun error action
             -> Time.Time
@@ -108,9 +110,8 @@ tasks, external events, or time. Will come up with an example that actually
 uses them!
 -}
 start : App model error action
-     -> Signal action
      -> (Signal Html, Signal (T.Task error ()))
-start app externalActions =
+start app =
   let
     {- Annotations which use type vars commented out because if you uncomment
     them, you get type errors like this:
@@ -131,14 +132,14 @@ start app externalActions =
     allActions =
       Signal.merge
         actionsMailbox.signal
-        (Signal.map Just externalActions)
+        (Signal.map Just app.externalActions)
         |> Time.timestamp
 
     --stateAndTask : Signal (model, Maybe (T.Task error ()))
     stateAndTask =
       Signal.foldp
         (\(now, Just action) (state, _) -> app.update loopbackFun now action state)
-        (app.initialState, [])
+        (app.initialState, app.initialTasks loopbackFun)
         allActions
 
     html : Signal Html
