@@ -1,4 +1,4 @@
-module StartApp (App, LoopbackFun, start) where
+module StartApp (App, LoopbackFun, UpdateFun, start) where
 {-| This module makes it super simple to get started making a typical web-app.
 It is designed to work perfectly with [the Elm Architecture][arch] which
 describes a simple architecture pattern that makes testing and refactoring
@@ -7,7 +7,7 @@ shockingly pleasant. Definititely read [the tutorial][arch] to get started!
 [arch]: https://github.com/evancz/elm-architecture-tutorial/
 
 # Define your App
-@docs App, LoopbackFun
+@docs App, LoopbackFun, UpdateFun
 
 # Run your App
 @docs start
@@ -42,11 +42,11 @@ hard in other languages.
 [address]: http://package.elm-lang.org/packages/elm-lang/core/2.0.1/Signal#Mailbox
 [arch]: https://github.com/evancz/elm-architecture-tutorial/
 -}
-type alias App model error action =
+type alias App model view action error =
     { initialState : model
     , initialTasks : LoopbackFun error action -> List (T.Task error ())
     , externalActions : Signal action
-    , view : Address action -> model -> Html
+    , view : Address action -> model -> view
     , update : LoopbackFun error action
             -> Time.Time
             -> action
@@ -58,6 +58,16 @@ type alias App model error action =
 into your action channel. (TODO: more docs) -}
 type alias LoopbackFun error action =
   T.Task error action -> T.Task error ()
+
+
+{-|-}
+type alias UpdateFun model error action =
+  LoopbackFun error action
+  -> Time.Time
+  -> action
+  -> model
+  -> (model, List (T.Task error ()))
+
 
 {-| This actually starts up your `App`. The following code sets up a counter
 that can be incremented and decremented. You can read more about writing
@@ -109,8 +119,8 @@ TODO: this example is somewhat ridiculous because it doesn't need to use
 tasks, external events, or time. Will come up with an example that actually
 uses them!
 -}
-start : App model error action
-     -> (Signal Html, Signal (T.Task error ()))
+start : App model view action error
+     -> (Signal view, Signal (T.Task error ()))
 start app =
   let
     {- Annotations which use type vars commented out because if you uncomment
@@ -142,8 +152,8 @@ start app =
         (app.initialState, app.initialTasks loopbackFun)
         allActions
 
-    html : Signal Html
-    html =
+    --view : Signal view
+    view =
       stateAndTask
         |> Signal.map fst
         |> Signal.map (app.view justWrapper)
@@ -154,7 +164,7 @@ start app =
         |> Signal.filterMap (snd >> toMaybe) []
         |> Signal.map (sequence_ ())
   in
-    (html, tasks)
+    (view, tasks)
 
 -- Util
 
