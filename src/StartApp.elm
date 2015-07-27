@@ -43,16 +43,16 @@ hard in other languages.
 [arch]: https://github.com/evancz/elm-architecture-tutorial/
 -}
 type alias App model view action error =
-    { initialState : model
-    , initialTasks : LoopbackFun error action -> List (T.Task error ())
-    , externalActions : Signal action
-    , view : Address action -> model -> view
-    , update : LoopbackFun error action
-            -> Time.Time
-            -> action
-            -> model
-            -> (model, List (T.Task error ()))
-    }
+  { initialState : model
+  , initialTasks : LoopbackFun error action -> List (T.Task error ())
+  , externalActions : Signal action
+  , view : Address action -> model -> view
+  , update : LoopbackFun error action
+          -> Time.Time
+          -> action
+          -> model
+          -> (model, List (T.Task error ()))
+  }
 
 {-| Use this in your update function to push the result of a task
 into your action channel. (TODO: more docs) -}
