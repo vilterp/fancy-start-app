@@ -1,13 +1,13 @@
 {
     "version": "4.0.0",
     "summary": "start making HTML apps really easily, plus tasks, external events and time",
-    "repository": "https://github.com/vilterp/start-app.git",
+    "repository": "https://github.com/vilterp/fancy-start-app.git",
     "license": "BSD3",
     "source-directories": [
         "src"
     ],
     "exposed-modules": [
-        "StartApp"
+        "FancyStartApp"
     ],
     "dependencies": {
         "elm-lang/core": "2.0.1 <= v < 3.0.0",
