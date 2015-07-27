@@ -1,4 +1,4 @@
-module StartApp (App, LoopbackFun, UpdateFun, start) where
+module FancyStartApp (App, LoopbackFun, UpdateFun, start) where
 {-| This module makes it super simple to get started making a typical web-app.
 It is designed to work perfectly with [the Elm Architecture][arch] which
 describes a simple architecture pattern that makes testing and refactoring
